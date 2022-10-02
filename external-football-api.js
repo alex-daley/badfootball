@@ -16,7 +16,7 @@ function v4Route(route) {
   return `${process.env.FOOTBALL_API_DOMAIN}/v4/${route}`
 }
 
-export async function getCompetitions() {
+export async function fetchCompetitions() {
   const res = await axios.get(v4Route('competitions'), authHeader())
   const { competitions } = res.data 
 
@@ -27,7 +27,7 @@ export async function getCompetitions() {
   }))
 }
 
-export async function getTeamsForCompetition(competitionCode) {
+export async function fetchTeamsForCompetition(competitionCode) {
   const res = await axios.get(v4Route(`competitions/${competitionCode}/teams`), authHeader())
   const { teams } = res.data
 

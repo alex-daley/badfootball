@@ -1,6 +1,7 @@
-import * as footballApi from './external-football-api.js'
-import * as dotenv from 'dotenv'
 import express from 'express'
+import * as dotenv from 'dotenv'
+import { fetchCompetitions, fetchTeamsForCompetition } from './external-football-api.js'
+import Cache from './cache.js'
 
 dotenv.config()
 
@@ -24,16 +25,20 @@ export function createApp() {
   checkEnviromentVariables() 
   
   const app = express()
+  const cache = new Cache()
   
   app.get('/api/competitions', async(_, res) => {
-    const competitions = await footballApi.getCompetitions()
+    const competitions = await cache.getLazy('COMPETITIONS', fetchCompetitions)
     res.json(competitions)
   })
   
   app.get('/api/:competition/teams', async(req, res) => {
     const { competition } = req.params
-    const competitions = await footballApi.getTeamsForCompetition(competition)
-    res.json(competitions)
+    const teams = await cache.getLazy(`TEAMS/${competition}`, async () => {
+      return await fetchTeamsForCompetition(competition)
+    })
+
+    res.json(teams)
   })
 
   return app
