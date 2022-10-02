@@ -1,10 +1,22 @@
+
+import * as footballApi from './external-football-api.js'
+import * as dotenv from 'dotenv'
 import express from 'express'
+
+dotenv.config()
 
 const app = express()
 const port = 3001
 
-app.get('/', (req, res) => {
-  res.send('hello world')
+app.get('/api/competitions', async(_, res) => {
+  const competitions = await footballApi.getCompetitions()
+  res.json(competitions)
+})
+
+app.get('/api/:competition/teams', async(req, res) => {
+  const { competition } = req.params
+  const competitions = await footballApi.getTeamsForCompetition(competition)
+  res.json(competitions)
 })
 
 app.listen(port, () => {
