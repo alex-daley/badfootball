@@ -17,7 +17,7 @@ function v4Route(route) {
 }
 
 export async function getCompetitions() {
-  const res = await axios(v4Route('competitions'), authHeader())
+  const res = await axios.get(v4Route('competitions'), authHeader())
   const { competitions } = res.data 
 
   return competitions.map(competition => ({
@@ -28,7 +28,7 @@ export async function getCompetitions() {
 }
 
 export async function getTeamsForCompetition(competitionCode) {
-  const res = await axios(v4Route(`competitions/${competitionCode}/teams`), authHeader())
+  const res = await axios.get(v4Route(`competitions/${competitionCode}/teams`), authHeader())
   const { teams } = res.data
 
   return teams.map(team => ({
