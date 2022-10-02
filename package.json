@@ -7,7 +7,9 @@
   "main": "main.js",
   "scripts": {
     "test": "jest",
-    "start": "node main.js"
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "node main.js",
+    "client": "node dev-client.js"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +21,7 @@
   "devDependencies": {
     "@babel/core": "^7.19.3",
     "@babel/preset-env": "^7.19.3",
+    "concurrently": "^7.4.0",
     "jest": "^29.1.2",
     "supertest": "^6.2.4"
   },
