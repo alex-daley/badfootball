@@ -1,20 +1,18 @@
 import React from 'react'
+import CssBaseline from '@mui/material/CssBaseline'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
+import StartingEleven from './StartingEleven'
 
 export default function App() {
-  const [competitions, setCompetitions] = React.useState()
-
-  React.useEffect(() => {
-    fetch('/api/competitions').then(async res => {
-      const competitions = await res.json()
-      setCompetitions(competitions)
-    })
-  }, [])
-  
   return (
-    <div>
-      <header>
-        <h1>Badfootball</h1>
-      </header> 
-    </div>
+    <React.Fragment>
+      <CssBaseline />
+      <Container maxWidth="sm">
+        <Box sx={{ height: '100vh' }} p={4} >
+          <StartingEleven/>
+        </Box>
+      </Container>
+    </React.Fragment>
   )
 }
