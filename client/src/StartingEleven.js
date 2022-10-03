@@ -10,6 +10,7 @@ import Select from '@mui/material/Select'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
 import IconAdd from '@mui/icons-material/AddCircle'
+import { useTeamData } from './footballApi'
 
 const GLK = 'goalkeeper'
 const DEF = 'defender'
@@ -89,31 +90,55 @@ function StartingElevenGrid(props) {
   )
 }
 
-export default function StartingEleven() {
-  const [formationName, setFormationName] = React.useState('4-4-3')
-
-  const handleFormationChange = (event) => {
-    setFormationName( event.target.value)
-  }
+function WrappedSelect(props) {
+  const { labelId, label, selectId, prompt, values, valueIndex, onChange } = props
+  
+  const menuItems = !values
+    ? <MenuItem value={0}><em></em></MenuItem>
+    : values.map((v, i) => <MenuItem key={i} value={i}>{v}</MenuItem>)
 
   return (
+    <FormControl>
+      <InputLabel id={labelId}>{label}</InputLabel>
+      <Select value={valueIndex} labelId={labelId} id={selectId} label={label} onChange={e => onChange(e.target.value)} > 
+        {menuItems}
+      </Select>
+      <FormHelperText>{prompt}</FormHelperText>
+    </FormControl>
+  )
+}
+
+export default function StartingEleven() {
+  const [formationIndex, setFormationIndex] = React.useState(0) 
+  const [teamIndex, setTeamIndex] = React.useState(0)
+  
+  const { teams } = useTeamData('PL')
+  const teamNames = teams?.map(team => team.name)
+  const formation = FORMATIONS[Object.keys(FORMATIONS)[formationIndex]]
+  
+  return (
     <Stack sx={{ height: '100%' }}>
-      <FormControl>
-        <InputLabel id="formation-select-helper-label">Formation</InputLabel>
-        <Select
-          value={formationName}
-          labelId="formation-select-helper-label"
-          id="formation-select-helper" 
-          label="Formation"
-          onChange={handleFormationChange}
-        >
-          {Object.keys(FORMATIONS).map(formation => (
-            <MenuItem key={formation} value={formation}>{formation}</MenuItem>
-          ))}
-        </Select>
-        <FormHelperText>Select formation</FormHelperText>
-      </FormControl>
-      <StartingElevenGrid formation={FORMATIONS[formationName]}/>
+      <WrappedSelect 
+        labelId="team-select-label" 
+        id="team-select" 
+        label="Team" 
+        prompt="Select a team"  
+        valueIndex={teamIndex}
+        values={teamNames}
+        onChange={setTeamIndex}
+      />
+      <WrappedSelect 
+        labelId="formation-select-label" 
+        id="formation-select" 
+        label="Formation" 
+        prompt="Select a formation"  
+        valueIndex={formationIndex}
+        values={Object.keys(FORMATIONS)}
+        onChange={setFormationIndex}
+      />
+      <StartingElevenGrid 
+        formation={formation}
+      />
     </Stack>
   )
 }
