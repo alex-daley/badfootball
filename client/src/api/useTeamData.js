@@ -1,11 +1,13 @@
 import React from 'react'
 
-export function useTeamData(competition) {
+export default function useTeamData(competition) {
   const [teams, setTeams] = React.useState()
   const [error, setError] = React.useState()
-  const [isLoading, setIsLoading] = React.useState()
+  const [isLoading, setIsLoading] = React.useState(true)
 
   React.useEffect(() => {
+    if (!competition) return
+
     (async() => {
       setIsLoading(true)
 
@@ -23,9 +25,5 @@ export function useTeamData(competition) {
     })()
   }, [competition])
 
-  return {
-    teams, 
-    error, 
-    isLoading
-  }
+  return { teams, error, isLoading }
 }
