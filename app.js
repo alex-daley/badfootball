@@ -22,7 +22,7 @@ function checkEnvironmentVariables() {
 }
 
 export function createApp() {
-  checkEnviromentVariables() 
+  checkEnvironmentVariables() 
   
   const app = express()
   const cache = new Cache()
