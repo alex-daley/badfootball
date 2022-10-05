@@ -5,7 +5,7 @@ import Cache from './cache.js'
 
 dotenv.config()
 
-function checkEnviromentVariables() {
+function checkEnvironmentVariables() {
   let errors = []
   if (!process.env.FOOTBALL_API_TOKEN)  {
     errors.push('FOOTBALL_API_TOKEN is not defined')
