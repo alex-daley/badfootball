@@ -10,15 +10,14 @@ import Select from '@mui/material/Select'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
 import IconAdd from '@mui/icons-material/AddCircle'
-
-const SquadContext = React.createContext(null)
+import Avatar from '@mui/material/Avatar'
 
 function filterSquad(squad, position) {
   const formatForApiNaming = () => {
     switch (position) {
       case 'forward': return 'Offence'
       case 'defender': return 'Defence'
-      case 'midfielder' : return 'Midfield'
+      case 'midfielder': return 'Midfield'
       case 'goalkeeper': return 'Goalkeeper'
       default: throw Error('Unknown position')
     }
@@ -27,14 +26,50 @@ function filterSquad(squad, position) {
   return squad.filter(player => player.position === apiName)
 }
 
+function flattenFormation(formation) {
+  const flatFormation = ['goalkeeper']
+
+  formation.forEach(([role, numPlayers]) => {
+    for (let i = 0; i < numPlayers; i++) {
+      flatFormation.push(role)
+    }
+  })
+
+  return flatFormation
+}
+
+function calculateWidth(formation, index) {
+  let k = 0
+
+  for (const [, numPlayers] of formation) {
+    for (let i = 0; i < numPlayers; i++) {
+      if (k === index) { 
+        return 12 / numPlayers
+      }
+      k++
+    }
+  }
+
+  return 1
+}
+
+function getInitials(fullName) {
+  const names = fullName.split(' ')
+  if (names.length === 1) return names[0][0]
+
+  const firstName = names[0]
+  const lastName = names[names.length - 1]
+  return firstName[0] + lastName[0]
+}
+
 function PlayerIcon(props) {
-  const { position } = props
-  const squad = React.useContext(SquadContext) 
-  const squadForPosition = filterSquad(squad(), position)
+  const { squad, index, player, role, onPlayerChosen } = props
+
+  const squadForRole = filterSquad(squad, role)
 
   const [anchorEl, setAnchorEl] = React.useState()
   const open = Boolean(anchorEl)
-  const label = `Add a ${position}` 
+  const label = `Add for player[${index}]`
 
   const handleClickOpen = (e) => {
     setAnchorEl(e.currentTarget)
@@ -45,9 +80,10 @@ function PlayerIcon(props) {
   }
 
   const handlePlayerClick = (player) => {
+    onPlayerChosen(index, player)
     handleClickClose()
   }
- 
+
   return (
     <Box
       sx={{
@@ -59,8 +95,10 @@ function PlayerIcon(props) {
       }}
     >
       <Tooltip title={label}>
-        <IconButton aria-label={label} onClick={ handleClickOpen} >
-          <IconAdd sx={{ fontSize: 60 }} />
+        <IconButton aria-label={label} onClick={handleClickOpen} >
+          {player
+            ? <Avatar sx={{ width: 50, height: 50 }}>{getInitials(player.name)}</Avatar>
+            : <IconAdd sx={{ width: 50, height: 50, fontSize: 60 }} />}
         </IconButton>
       </Tooltip>
       <Menu
@@ -72,48 +110,13 @@ function PlayerIcon(props) {
         anchorOrigin={{ vertical: 'center', horizontal: 'center' }}
         transformOrigin={{ vertical: 'center', horizontal: 'center' }}
       >
-        {squadForPosition.map(player => (
-          <MenuItem key={player.name} onClick={handlePlayerClick}>
+        {squadForRole.map(player => (
+          <MenuItem key={player.name} onClick={() => handlePlayerClick(player)}>
             {player.name}
-          </MenuItem>  
+          </MenuItem>
         ))}
       </Menu>
     </Box>
-  )
-}
-
-function PlayerRow(props) {
-  const MAX_BREAKPOINT = 12
-  const { position, numPlayers } = props
-
-  const widthPerItem = MAX_BREAKPOINT / numPlayers
-  const nodes = new Array(numPlayers)
-
-  for (let i = 0; i < numPlayers; i++) {
-    nodes[i] = (
-      <Grid item key={position + numPlayers + i} xs={widthPerItem}>
-        <PlayerIcon position={position} />
-      </Grid>
-    )
-  }
-
-  return (
-    <React.Fragment>
-      {nodes}
-    </React.Fragment>
-  )
-}
-
-function StartingElevenGrid(props) {
-  const { formation } = props
-
-  return (
-    <Grid container sx={{ height: '100%' }}>
-      <PlayerRow position={'goalkeeper'} numPlayers={1} />
-      {formation.map(([position, numPlayers], i) => (
-        <PlayerRow key={position + numPlayers + i} position={position} numPlayers={numPlayers} />
-      ))}
-    </Grid>
   )
 }
 
@@ -136,13 +139,22 @@ function WrappedSelect(props) {
 
 export default function StartingXIGrid(props) {
   const { formations, teams } = props
-
   const [formationIndex, setFormationIndex] = React.useState(0)
   const [teamIndex, setTeamIndex] = React.useState(0)
+  const [startingXI, setStartingXI] = React.useState(Array(11).fill(undefined))
 
   const teamNames = teams?.map(team => team.name)
   const formation = formations[Object.keys(formations)[formationIndex]]
-  const squad = teams[teamIndex].squad 
+  const flatFormation = flattenFormation(formation)
+  const squad = teams[teamIndex].squad
+
+  const handlePlayerChosen = (index, player) => {
+    setStartingXI(players => {
+      const updatedPlayers = players.slice()
+      updatedPlayers[index] = player
+      return updatedPlayers
+    })
+  }
 
   return (
     <Stack sx={{ height: '100%' }} spacing={2}>
@@ -162,9 +174,23 @@ export default function StartingXIGrid(props) {
         values={Object.keys(formations)}
         onChange={setFormationIndex}
       />
-      <SquadContext.Provider value={() => squad}>
-        <StartingElevenGrid formation={formation} />
-      </SquadContext.Provider>
+      <Grid container sx={{ height: '100%' }}>
+        {startingXI.map((player, i) => (
+          <Grid
+            item
+            xs={calculateWidth(formation, i)}
+            key={i}
+          >
+            <PlayerIcon
+              player={player}
+              squad={squad}
+              role={flatFormation[i]}
+              index={i}
+              onPlayerChosen={handlePlayerChosen}
+            />
+          </Grid>
+        ))}
+      </Grid>
     </Stack>
   )
 }
