@@ -67,7 +67,7 @@ export default function SignIn({ onSignInRequest, onSignUpRequest }) {
           href="#" 
           onClick={handleSignUpButtonClick}
         >
-          Create a badfootball account
+          Don't have an account? Sign up.
         </Link>
       </Box>
     </Box>

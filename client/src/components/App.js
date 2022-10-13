@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import CssBaseline from '@mui/material/CssBaseline'
-import Box from '@mui/material/Box'
-import Dialog from '@mui/material/Dialog' 
+import Box from '@mui/material/Box' 
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
@@ -9,9 +8,8 @@ import Tooltip from '@mui/material/Tooltip'
 import Avatar from '@mui/material/Avatar'
 import IconButton from '@mui/material/IconButton'
 import FootballIcon from '@mui/icons-material/SportsSoccer'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
-import SignIn from './SignIn'
-import SignUp from './SignUp'
+import { createTheme, ThemeProvider } from '@mui/material/styles' 
+import UserProfileDialog from './UserProfileDialog'
 
 const theme = createTheme({
   palette: {
@@ -22,22 +20,14 @@ const theme = createTheme({
 })
 
 export default function App() {
-  const [userContext, setUserContext] = useState({ state: undefined })
+  const [openUserProfile, setOpenUserProfile] = useState(false)
 
-  function handleUserProfileClick() {
-    setUserContext(ctx => ({ ...ctx, state: 'signin' }))
+  const handleUserProfileClick = () => {
+    setOpenUserProfile(open => !open)
   }
 
-  function handleCloseUserProfile() {
-    setUserContext(ctx => ({ ...ctx, state: undefined }))
-  }
-
-  function handleSignUpClick() {
-    setUserContext(ctx => ({ ...ctx, state: undefined }))
-    setTimeout(() => {
-      setUserContext(ctx => ({ ...ctx, state: 'signup' }))
-    }, 300)
-    
+  const handleUserProfileClose = () => {
+    setOpenUserProfile(false)
   }
 
   return (
@@ -58,24 +48,10 @@ export default function App() {
             </Tooltip>
           </Toolbar>
         </AppBar>
-        <Dialog 
-          open={userContext.state === 'signin'} 
-          onClose={handleCloseUserProfile}
-          maxWidth="xs"
-          fullWidth
-        > 
-          <SignIn 
-            onSignUpRequest={handleSignUpClick}
-          />
-        </Dialog>
-        <Dialog 
-          open={userContext.state === 'signup'} 
-          onClose={handleCloseUserProfile}
-          maxWidth="xs"
-          fullWidth
-        > 
-          <SignUp/>
-        </Dialog>
+        <UserProfileDialog 
+          open={openUserProfile} 
+          onClose={handleUserProfileClose} 
+        />
       </Box>
     </ThemeProvider>
   )

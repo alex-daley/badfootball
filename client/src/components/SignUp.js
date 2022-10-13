@@ -2,10 +2,15 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import Link from '@mui/material/Link'
 import Avatar from '@mui/material/Avatar'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 
-export default function SignUp() {
+export default function SignUp({ onSignInRequest }) {
+  const handleSignInClick = () =>{
+    onSignInRequest?.()
+  }
+
   return (
     <Box
       m={4}
@@ -53,9 +58,12 @@ export default function SignUp() {
         >
           Sign up
         </Button>
-        <Typography variant="body2" color="text.secondary">
-          We will never share your email address.
-        </Typography>
+        <Link 
+          href="#" 
+          onClick={handleSignInClick}
+        >
+          Already have an account? Sign in.
+        </Link> 
       </Box>
     </Box>
   )
