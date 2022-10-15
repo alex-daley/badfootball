@@ -4,15 +4,11 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Link from '@mui/material/Link'
 import Avatar from '@mui/material/Avatar'
-import PersonIcon from '@mui/icons-material/Person' 
+import PersonAddIcon from '@mui/icons-material/PersonAdd'
 
-export default function SignIn({ onSignInRequest, onSignUpRequest }) {
-  function handleSignInButtonClick() {
+export default function UserSignUp({ onSignInRequest }) {
+  const handleSignInClick = () =>{
     onSignInRequest?.()
-  }
-
-  function handleSignUpButtonClick() {
-    onSignUpRequest?.()
   }
 
   return (
@@ -25,10 +21,10 @@ export default function SignIn({ onSignInRequest, onSignUpRequest }) {
       }}
     >
       <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-        <PersonIcon />
+        <PersonAddIcon />
       </Avatar>
       <Typography component="h1" variant="h5">
-        Sign in
+        Sign up
       </Typography>
       <Box component="form" mt={1} noValidate>
         <TextField
@@ -58,17 +54,16 @@ export default function SignIn({ onSignInRequest, onSignUpRequest }) {
           type="submit"
           variant="contained"
           color="secondary"
-          onClick={handleSignInButtonClick}
           sx={{ my: 3 }}
         >
-          Sign in
+          Sign up
         </Button>
         <Link 
           href="#" 
-          onClick={handleSignUpButtonClick}
+          onClick={handleSignInClick}
         >
-          Don't have an account? Sign up.
-        </Link>
+          Already have an account? Sign in.
+        </Link> 
       </Box>
     </Box>
   )

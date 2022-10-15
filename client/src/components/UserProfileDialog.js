@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Dialog from '@mui/material/Dialog' 
-import SignIn from './SignIn'
-import SignUp from './SignUp'
+import UserSignIn from './UserSignIn'
+import UserSignUp from './UserSignUp'
 
 function DialogContent({ contentId, onChange }) {
   const redirectToSignUp = () => onChange('SIGN_UP')
@@ -10,9 +10,9 @@ function DialogContent({ contentId, onChange }) {
 
   switch (contentId) {
     case 'SIGN_IN':
-      return <SignIn onSignUpRequest={redirectToSignUp}/>
+      return <UserSignIn onSignUpRequest={redirectToSignUp}/>
     case 'SIGN_UP':
-      return <SignUp onSignInRequest={redirectToSignIn}/>
+      return <UserSignUp onSignInRequest={redirectToSignIn}/>
     default:
       throw new Error('Unhandled content Id')
   }
