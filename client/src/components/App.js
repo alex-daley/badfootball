@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom'
 import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box' 
+import Container from '@mui/material/Container'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
@@ -9,12 +11,13 @@ import Avatar from '@mui/material/Avatar'
 import IconButton from '@mui/material/IconButton'
 import FootballIcon from '@mui/icons-material/SportsSoccer'
 import { createTheme, ThemeProvider } from '@mui/material/styles' 
+import CompetitionSelect from './CompetitionSelect'
 import UserProfileDialog from './UserProfileDialog'
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1977b5'
+      main: '#5a005a'
     }
   }
 })
@@ -33,21 +36,27 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ height: '100vh' }} >
-        <AppBar position="relative" elevation={0}>
-          <Toolbar>
+      <Box sx={{ height: '100%' }} >
+        <AppBar position="relative">
+          <Toolbar variant="dense">
             <FootballIcon sx={{ mr: 2 }} />
             <Typography variant="h6" color="inherit" sx={{ flexGrow: 1 }} noWrap>
               Badfootball
             </Typography>
             <Tooltip title="Sign in">
               <IconButton onClick={handleUserProfileClick}>
-                <Avatar aria-label="Sign in" sx={{ bgcolor: 'grey', color: 'white' }}>
-                </Avatar>
+                <Avatar aria-label="Sign in" sx={{ bgcolor: 'grey', color: 'white' }}/>
               </IconButton>
             </Tooltip>
           </Toolbar>
         </AppBar>
+        <Container maxWidth="sm" sx={{ mt: { xs: 4, md: 8 }, width: '100%' }}>
+          <Router>
+            <Routes>
+              <Route path="/" element={<CompetitionSelect/>} />
+            </Routes>
+          </Router>
+        </Container>
         <UserProfileDialog 
           open={openUserProfile} 
           onClose={handleUserProfileClose} 

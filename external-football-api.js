@@ -23,7 +23,10 @@ export async function fetchCompetitions() {
   return competitions.map(competition => ({
     name: competition.name,
     code: competition.code,
-    emblem: competition.emblem
+    emblem: competition.emblem,
+    country: competition.area.name,
+    startDate: competition.currentSeason.startDate,
+    endDate: competition.currentSeason.endDate
   }))
 }
 
