@@ -19,7 +19,8 @@ export const FORMATIONS = {
 
 export default function useFormations() {
   return { 
-    formations: FORMATIONS, 
+    // Convert from an object to an array of objects.
+    formations: Object.entries(FORMATIONS).map(([ name, layout ]) => ({ name, layout: [['goalkeeper', 1]].concat(layout) })), 
     error: false, 
     isLoading: false 
   }

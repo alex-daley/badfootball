@@ -5,7 +5,6 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import ListItemAvatar from '@mui/material/ListItemAvatar' 
 import Avatar from '@mui/material/Avatar'
-import useCompetitions from '../api/useCompetitions'
 
 function isPrioritised(competitionCode) {
   return (
@@ -16,7 +15,7 @@ function isPrioritised(competitionCode) {
   )
 }
 
-function CompetitionList({ competition, competitions, onClick }) {
+export default function CompetitionSelect({ competition, competitions, onClick }) {
   const prioritisedCompetitions = useMemo(() => {
     return competitions
       .reduce((acc, x) => isPrioritised(x.code) ? [x, ...acc] : [...acc, x], [])
@@ -37,15 +36,4 @@ function CompetitionList({ competition, competitions, onClick }) {
       ))}
     </List>
   )
-}
-
-export default function CompetitionSelect({ competition, onClick }) {
-  const { competitions, isLoading } = useCompetitions()
-  if (isLoading) return <></>
-
-  return <CompetitionList 
-    competitions={competitions}  
-    competition={competition} 
-    onClick={onClick} 
-  />
 }

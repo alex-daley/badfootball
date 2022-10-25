@@ -15,6 +15,9 @@ import { createTheme, ThemeProvider } from '@mui/material/styles'
 import CompetitionSelect from './CompetitionSelect'
 import TeamBuilder from './TeamBuilder'
 import UserProfileDialog from './UserProfileDialog'
+import useCompetitions from '../api/useCompetitions'
+import useTeamData from '../api/useTeamData'
+import useFormations from '../api/useFormations'
 
 const theme = createTheme({
   palette: {
@@ -24,9 +27,29 @@ const theme = createTheme({
   }
 }) 
 
+function PlaceholderText({ content }) {
+  return ( 
+    <Typography variant="h5" component="p">
+      {content}
+    </Typography> 
+  )
+}
+
 export default function App() {
   const [openUserProfile, setOpenUserProfile] = useState(false)
   const [competition, setCompetition] = useState()
+
+  const { 
+    isLoading: isLoadingCompetitions, 
+    competitions 
+  } = useCompetitions()
+
+  const {
+    isLoading: isLoadingTeamData,
+    teams 
+  } = useTeamData(competition?.code)
+
+  const { formations } = useFormations()
 
   const handleUserProfileClick = () => {
     setOpenUserProfile(open => !open)
@@ -61,14 +84,17 @@ export default function App() {
           <Grid container spacing={2}>
             <Grid item xs={4}>
               <Paper square variant="outlined">
-                <CompetitionSelect competition={competition} onClick={handleCompetitionSelect}/>
+                {!isLoadingCompetitions && 
+                  <CompetitionSelect competitions={competitions} competition={competition} onClick={handleCompetitionSelect}/>}
               </Paper>
             </Grid> 
             <Grid item xs={8}>
               <Paper square variant="outlined" sx={{ height: '100%', p: 2 }}>
-                <TeamBuilder competition={competition}/>
+                {!competition 
+                  ? <PlaceholderText content="Please select a competition." /> 
+                  : !isLoadingTeamData && <TeamBuilder competitionName={competition.name} teams={teams} formations={formations} />}
               </Paper>
-            </Grid> 
+            </Grid>
           </Grid>
 
         </Container>
