@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import Stack from '@mui/material/Stack'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -9,32 +9,15 @@ import MenuItem from '@mui/material/MenuItem'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import Avatar from '@mui/material/Avatar'
-import AddIcon from '@mui/icons-material/AddCircleOutline'
+import Button from '@mui/material/Button'
+import AddIcon from '@mui/icons-material/Add'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import ShareIcon from '@mui/icons-material/Share'
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
+import RemoveIcon from '@mui/icons-material/HighlightOff'
 import WrappedSelect from './WrappedSelect'
-import WrappedSpan from './WrappedSpan' 
-
-function initStartingEleven(formation) {
-  const rows = []
-
-  for (let i = 0; i < formation.layout.length; i++) {
-    const [position, numPlayers] = formation.layout[i]
-    const players = []
-    for (let k = 0; k < numPlayers; k++) {
-      players.push({  
-        key: `${position}-${k + 1}`,
-        position,
-        player: null
-      })
-    } 
-
-    rows.push({
-      key: `row-${i + 1}`,
-      players
-    })
-  }
-
-  return rows
-}
+import WrappedSpan from './WrappedSpan'
+import FootballPitch from './footballpitch.png'
 
 // Convert how we describe football positions to how the football-data.org API does so.
 function footballDataOrgNameToOurName(position) {
@@ -47,23 +30,53 @@ function footballDataOrgNameToOurName(position) {
   }
 }
 
-function PlayerIcon({ player, onClick }) {
-  const handleClick = event => onClick?.(event, player)
+function getInitials(fullName) {
+  const names = fullName.split(' ')
+  if (names.length === 1) return names[0][0]
+  const firstName = names[0]
+  const lastName = names[names.length - 1]
+  return firstName[0] + lastName[0]
+}
+
+function StartingElevenPlace({ index, currentPlayer, position, onClick, onRemove }) {
+  const handleClick = (event) => {
+    onClick?.(event, index)
+  }
+
+  const handleRemove = () => {
+    onRemove?.(index)
+  }
 
   return (
-    <Tooltip title={`Add a ${player.position}`}>
-      <IconButton onClick={handleClick}>
-        <Avatar> 
-          <AddIcon/>
-        </Avatar>
-      </IconButton>
-    </Tooltip>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxHeight: 50 }}> 
+      <Box sx={{ visibility: !currentPlayer?.name || currentPlayer.position === footballDataOrgNameToOurName(position) ? 'hidden' : 'visible' }}>
+        <Typography sx={{ color: '#e30e1f', fontWeight: 'bolder' }} variant="caption">
+          Invalid position
+        </Typography>
+        <IconButton sx={{ color: '#e30e1f', padding: 0, ml: .5 }} onClick={handleRemove}>
+          <RemoveIcon/>
+        </IconButton> 
+        </Box>
+      <Tooltip title={`Add a ${position}`}>
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <IconButton onClick={handleClick}>
+            <Avatar>
+              {!currentPlayer?.name ? <AddIcon/> : getInitials(currentPlayer.name)}
+            </Avatar>
+          </IconButton>
+        </Box>
+      </Tooltip> 
+      <Typography variant="body2" sx={{ minHeight: 30, textAlign: 'center' }}>
+        {currentPlayer?.name}
+      </Typography> 
+    </Box>
   )
 }
 
-function PlayerSelectMenu({ anchorEl, onClose, players }) {
+function PlayerSelectMenu({ anchorEl, startingEleven, players, onClick, onClose }) {
   const origin = { vertical: 'center', horizontal: 'center' }
   const open = Boolean(anchorEl) && Boolean(players)
+
   return (
     <Menu
       id="player-select-menu"
@@ -72,10 +85,14 @@ function PlayerSelectMenu({ anchorEl, onClose, players }) {
       open={open}
       onClose={onClose}
       anchorOrigin={origin}
-      transformOrigin={origin} 
-    > 
+      transformOrigin={origin}
+    >
       {players?.map(player => (
-        <MenuItem key={player.name}>
+        <MenuItem
+          key={player.name}
+          disabled={startingEleven.map(player => player.name).includes(player.name)}
+          onClick={() => onClick?.(player)}
+        >
           {player.name}
         </MenuItem>
       ))}
@@ -83,22 +100,50 @@ function PlayerSelectMenu({ anchorEl, onClose, players }) {
   )
 }
 
+function FormationGrid({ formation, startingEleven, onClick, onRemove }) {
+  const gridItems = []
+  let index = 0
+  for (const [position, numPlayers] of formation.layout) {
+
+    for (let i = 0; i < numPlayers; i++) {
+      index++
+      const currentPlayer = startingEleven[index]
+      
+      const width = 12 / numPlayers
+      gridItems.push(
+        <Grid item xs={width} key={`row-${index}`}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <StartingElevenPlace
+              index={index}
+              currentPlayer={currentPlayer}
+              position={position}
+              onClick={(event, index) => onClick(event, index, footballDataOrgNameToOurName(position))}
+              onRemove={onRemove}
+            />
+          </Box>
+        </Grid>
+      )
+
+    }
+  }
+
+  return <>{gridItems}</>
+}
+
 export default function TeamBuilder({ competitionName, teams, formations }) {
   const [team, setTeam] = useState(() => teams[0])
   const [formation, setFormation] = useState(() => formations[0])
-  const [startingEleven, setStartingEleven] = useState(() => initStartingEleven(formation))
+  const [startingEleven, setStartingEleven] = useState(() => Array(11).fill({}))
+  const [startingElevenUpdateIndex, setStartingElevenUpdateIndex] = useState()
+  const [startingElevenMenuFilter, setStartingElevenMenuFilter] = useState()
   const [menuAnchor, setMenuAnchor] = useState()
-  const [selectedPosition, setSelectedPosition] = useState()
-
-  const playersForPosition = team.squad.filter(player => player.position === selectedPosition)
-
-  useEffect(() => {
-    setStartingEleven(initStartingEleven(formation))
-  }, [formation])
 
   const teamNames = teams.map(team => team.name)
   const formationNames = formations.map(formation => formation.name)
-  
+
+  const players = useMemo(() => team.squad.filter(player => player.position === startingElevenMenuFilter),
+    [team, startingElevenMenuFilter])
+
   const handleTeamSelect = teamName => {
     setTeam(teams.find(team => team.name === teamName))
   }
@@ -107,13 +152,33 @@ export default function TeamBuilder({ competitionName, teams, formations }) {
     setFormation(formations.find(formation => formation.name === formationName))
   }
 
-  const handleFormationPlaceClick = (event, player) => {
+  const handleStartingElevenPlaceClick = (event, index, filter) => {
     setMenuAnchor(event.currentTarget)
-    setSelectedPosition(footballDataOrgNameToOurName(player.position))
+    setStartingElevenUpdateIndex(index)
+    setStartingElevenMenuFilter(filter)
   }
 
-  const handleClosePlayerMenu = () => {
-    setMenuAnchor(undefined)
+  const handleStartingElevenPlaceRemoveClick = (index) => { 
+    setStartingEleven(startingEleven => {
+      const startingEleven_ = startingEleven.slice()
+      startingEleven_[index] = {} 
+      return startingEleven_
+    })
+  }
+
+  const handlePlayerSelectMenuClick = (player) => {
+    setStartingEleven(startingEleven => {
+      const startingEleven_ = startingEleven.slice()
+      startingEleven_[startingElevenUpdateIndex] = player
+      return startingEleven_
+    })
+
+    handlePlayerSelectMenuClose()
+  }
+
+  const handlePlayerSelectMenuClose = () => {
+    setMenuAnchor()
+    setStartingElevenUpdateIndex()
   }
 
   return (
@@ -126,32 +191,50 @@ export default function TeamBuilder({ competitionName, teams, formations }) {
           <WrappedSelect label="team" value={team.name} values={teamNames} onChange={handleTeamSelect} />
         </Box>
         <Box sx={{ flex: 2 }}>
-          <WrappedSelect label="formation" value={formation.name} values={formationNames} onChange={handleFormationSelect}/>
+          <WrappedSelect label="formation" value={formation.name} values={formationNames} onChange={handleFormationSelect} />
         </Box>
       </Stack>
-      <Divider/>
+      <Divider />
       <Typography variant="body2">
-        Build your <WrappedSpan text={team.name}/> <WrappedSpan text={formation.name} secondary/> dream team!
+        Build your <WrappedSpan text={team.name} /> <WrappedSpan text={formation.name} secondary /> dream team!
       </Typography>
-      <Grid container sx={{ height: '100%' }}>
-        <PlayerSelectMenu 
-          anchorEl={menuAnchor} 
-          onClose={handleClosePlayerMenu} 
-          players={playersForPosition}
+      <Grid 
+        container 
+        sx={{ 
+          p: 2, 
+          height: '100%', 
+          backgroundImage: `url(${FootballPitch})`,
+          backgroundSize: 'contain',
+          backgroundPosition: 'center'
+         }}
+      >
+        <PlayerSelectMenu
+          anchorEl={menuAnchor}
+          players={players}
+          startingEleven={startingEleven}
+          onClick={handlePlayerSelectMenuClick}
+          onClose={handlePlayerSelectMenuClose}
         />
-        {startingEleven.map(row => {
-          const numPlayers = row.players.length
-          const width = 12 / numPlayers
-
-          return row.players.map(player => (
-            <Grid item key={player.key + player.name} xs={width} >
-              <Box sx={{ pt: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <PlayerIcon player={player} onClick={handleFormationPlaceClick}/>
-              </Box>
-            </Grid>
-          ))
-        })}
+        <FormationGrid
+          formation={formation}
+          startingEleven={startingEleven}
+          onClick={handleStartingElevenPlaceClick}
+          onRemove={handleStartingElevenPlaceRemoveClick}
+        />
       </Grid>
+      <Divider/>
+      <Stack direction="row" spacing={1}  >
+        <Button color="secondary" disableElevation startIcon={<CloudDownloadIcon/>}>
+          Load 
+        </Button>
+        <Box sx={{ flexGrow: 1 }} />
+        <Button color="secondary" disableElevation startIcon={<CloudUploadIcon/>}>
+          Save & Upload
+        </Button>
+        <Button color="secondary" disableElevation startIcon={<ShareIcon/>}>
+          Share
+        </Button>
+      </Stack>
     </Stack>
   )
 }

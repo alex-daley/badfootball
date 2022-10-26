@@ -9,6 +9,7 @@ import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Tooltip from '@mui/material/Tooltip'
 import Avatar from '@mui/material/Avatar'
+import Link from '@mui/material/Link'
 import IconButton from '@mui/material/IconButton'
 import FootballIcon from '@mui/icons-material/SportsSoccer'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
@@ -25,13 +26,13 @@ const theme = createTheme({
       main: '#09173d'
     }
   }
-}) 
+})
 
 function PlaceholderText({ content }) {
-  return ( 
+  return (
     <Typography variant="h5" component="p">
       {content}
-    </Typography> 
+    </Typography>
   )
 }
 
@@ -39,14 +40,14 @@ export default function App() {
   const [openUserProfile, setOpenUserProfile] = useState(false)
   const [competition, setCompetition] = useState()
 
-  const { 
-    isLoading: isLoadingCompetitions, 
-    competitions 
+  const {
+    isLoading: isLoadingCompetitions,
+    competitions
   } = useCompetitions()
 
   const {
     isLoading: isLoadingTeamData,
-    teams 
+    teams
   } = useTeamData(competition?.code)
 
   const { formations } = useFormations()
@@ -84,19 +85,24 @@ export default function App() {
           <Grid container spacing={2}>
             <Grid item xs={4}>
               <Paper square variant="outlined">
-                {!isLoadingCompetitions && 
-                  <CompetitionSelect competitions={competitions} competition={competition} onClick={handleCompetitionSelect}/>}
+                {!isLoadingCompetitions &&
+                  <CompetitionSelect competitions={competitions} competition={competition} onClick={handleCompetitionSelect} />}
               </Paper>
-            </Grid> 
+            </Grid>
             <Grid item xs={8}>
               <Paper square variant="outlined" sx={{ height: '100%', p: 2 }}>
-                {!competition 
-                  ? <PlaceholderText content="Please select a competition." /> 
+                {!competition
+                  ? <PlaceholderText content="Please select a competition." />
                   : !isLoadingTeamData && <TeamBuilder competitionName={competition.name} teams={teams} formations={formations} />}
               </Paper>
             </Grid>
           </Grid>
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+            <Typography variant="caption" sx={{ mt: 2 }}>
+              Football data provided by the <Link variant="caption" href="https://www.football-data.org/">Football-Data.org API</Link>
+            </Typography>
 
+          </Box>
         </Container>
         <UserProfileDialog
           open={openUserProfile}
