@@ -1,9 +1,9 @@
-import express from 'express'
-import * as dotenv from 'dotenv'
-import { fetchCompetitions, fetchTeamsForCompetition } from './external-football-api.js'
-import Cache from './cache.js'
-
-dotenv.config()
+const fs = require('path')
+const express = require('express')
+const api = require('./external-football-api')
+const Cache = require('./cache')
+ 
+require('dotenv').config()
 
 function checkEnvironmentVariables() {
   let errors = []
@@ -21,21 +21,29 @@ function checkEnvironmentVariables() {
   }
 }
 
-export function createApp() {
+module.exports = function createApp() {
   checkEnvironmentVariables() 
   
   const app = express()
   const cache = new Cache()
+
+  const buildPath = fs.join(__dirname, 'build')
+  console.log(`Serving client from: ${buildPath}`)
+  app.use(express.static(buildPath))
+
+  app.get('/', (_, res) => {
+    res.sendFile(fs.join(buildPath, 'index.html'))
+  })
   
   app.get('/api/competitions', async(_, res) => {
-    const competitions = await cache.getLazy('COMPETITIONS', fetchCompetitions)
+    const competitions = await cache.getLazy('COMPETITIONS', api.fetchCompetitions)
     res.json(competitions)
   })
   
   app.get('/api/:competition/teams', async(req, res) => {
     const { competition } = req.params
     const teams = await cache.getLazy(`TEAMS/${competition}`, async () => {
-      return await fetchTeamsForCompetition(competition)
+      return await api.fetchTeamsForCompetition(competition)
     })
 
     res.json(teams)

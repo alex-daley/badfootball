@@ -1,7 +1,6 @@
-import axios from 'axios' 
-import * as dotenv from 'dotenv'
+const axios = require('axios')
 
-dotenv.config()
+require('dotenv').config()
 
 function authHeader() {
   const token = process.env.FOOTBALL_API_TOKEN
@@ -16,7 +15,7 @@ function v4Route(route) {
   return `${process.env.FOOTBALL_API_DOMAIN}/v4/${route}`
 }
 
-export async function fetchCompetitions() {
+async function fetchCompetitions() {
   const res = await axios.get(v4Route('competitions'), authHeader())
   const { competitions } = res.data 
 
@@ -30,7 +29,7 @@ export async function fetchCompetitions() {
   }))
 }
 
-export async function fetchTeamsForCompetition(competitionCode) {
+async function fetchTeamsForCompetition(competitionCode) {
   const res = await axios.get(v4Route(`competitions/${competitionCode}/teams`), authHeader())
   const { teams } = res.data
 
@@ -43,4 +42,9 @@ export async function fetchTeamsForCompetition(competitionCode) {
       position: player.position
     }))
   }))
+}
+
+module.exports = {
+  fetchCompetitions,
+  fetchTeamsForCompetition
 }

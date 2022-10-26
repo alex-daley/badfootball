@@ -1,8 +1,9 @@
-import { createApp } from './app.js'
+const createApp = require('./app')
+const http = require('http')
 
 const port = 3001
 const app = createApp()
 
-app.listen(port, () => {
-  console.log(`Badfootball app listening on port ${port}`)
+http.createServer(app).listen(port, () => {
+  console.log(`server listening on port ${port}`)
 })

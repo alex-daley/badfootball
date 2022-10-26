@@ -1,4 +1,4 @@
-export default class Cache {
+module.exports = class Cache {
   data = new Map()
 
   has(key) {

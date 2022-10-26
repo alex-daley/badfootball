@@ -1,6 +1,6 @@
-import axios from 'axios'
-import supertest from 'supertest'
-import { createApp } from './app.js'
+const axios = require('axios')
+const supertest = require('supertest')
+const createApp = require('./app')
 
 const app = createApp()
 const request = supertest(app)

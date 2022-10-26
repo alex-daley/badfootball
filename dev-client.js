@@ -1,5 +1,4 @@
-import process from 'child_process'
-
+const process = require('child_process')
 // Go to `/client` and run npm start.
 // This is for development mode. 
 // In production we can run `npm run build` in the `/client` folder to build our static files that we can just serve that from our Express server.
