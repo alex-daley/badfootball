@@ -131,3 +131,6 @@ dist
 
 # Our build folder
 build
+
+# A folder containing code to be deployed to Plesk after running `pleskbuild.sh`
+plesk_out
