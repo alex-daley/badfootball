@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
@@ -15,7 +16,6 @@ import FootballIcon from '@mui/icons-material/SportsSoccer'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import CompetitionSelect from './CompetitionSelect'
 import TeamBuilder from './TeamBuilder'
-import UserProfileDialog from './UserProfileDialog'
 import useCompetitions from '../api/useCompetitions'
 import useTeamData from '../api/useTeamData'
 import useFormations from '../api/useFormations'
@@ -37,7 +37,8 @@ function PlaceholderText({ content }) {
 }
 
 export default function App() {
-  const [openUserProfile, setOpenUserProfile] = useState(false)
+  const { loginWithRedirect, logout, isAuthenticated } = useAuth0()
+
   const [competition, setCompetition] = useState()
 
   const {
@@ -53,11 +54,12 @@ export default function App() {
   const { formations } = useFormations()
 
   const handleUserProfileClick = () => {
-    setOpenUserProfile(open => !open)
-  }
-
-  const handleUserProfileClose = () => {
-    setOpenUserProfile(false)
+    if (isAuthenticated)  {
+      logout({ returnTo: window.location.origin })
+    }
+    else {
+      loginWithRedirect()
+    }
   }
 
   const handleCompetitionSelect = (competition) => {
@@ -104,10 +106,6 @@ export default function App() {
 
           </Box>
         </Container>
-        <UserProfileDialog
-          open={openUserProfile}
-          onClose={handleUserProfileClose}
-        />
       </Box>
     </ThemeProvider>
   )
