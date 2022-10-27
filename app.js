@@ -1,5 +1,6 @@
 const fs = require('path')
 const express = require('express')
+const { auth } = require('express-oauth2-jwt-bearer')
 const api = require('./external-football-api')
 const Cache = require('./cache')
  
@@ -20,6 +21,11 @@ function checkEnvironmentVariables() {
     throw Error(errors.join('\n'))
   }
 }
+
+const checkJwt = auth({
+  audience: 'https://ws325813-atw2.remote.ac/api/',
+  issuerBaseURL: `https://ws325813-atw2.eu.auth0.com/`
+})
 
 module.exports = function createApp() {
   checkEnvironmentVariables() 
@@ -47,6 +53,10 @@ module.exports = function createApp() {
     })
 
     res.json(teams)
+  })
+
+  app.get('/api/private', checkJwt, async(_, res) => {
+    res.send('You can only see this if you are authenticated')
   })
 
   return app
