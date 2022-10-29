@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import Divider from '@mui/material/Divider'
 import CloseIcon from '@mui/icons-material/Close'
+import LogoutIcon from '@mui/icons-material/Logout'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import Button from '@mui/material/Button'
 import Link from '@mui/material/Link'
@@ -32,11 +33,31 @@ function Login() {
         An optional free badfootball account allows you to save and load team formations from the cloud.
       </Typography>
     </Stack>
+  )
+}
 
+function Profile({ user }) {
+  const { logout } = useAuth0()
+
+  const handleClick = () => {
+    logout({ returnTo: window.location.origin })
+  }
+
+  return (
+    <Stack spacing={2}>  
+      <Typography component="div">
+        Hello, {user.name}!
+      </Typography>
+      <Button startIcon={<LogoutIcon/>} variant="outlined" onClick={handleClick}>
+        Logout
+      </Button> 
+    </Stack>
   )
 }
 
 export default function ProfilePopover({ open, anchorEl, onClose }) {
+  const { user, isAuthenticated } = useAuth0()
+
   const handleClose = () => {
     onClose?.()
   }
@@ -62,7 +83,7 @@ export default function ProfilePopover({ open, anchorEl, onClose }) {
           </Toolbar>
         </AppBar>
         <Box p={2}>
-          <Login />
+          {!isAuthenticated ? <Login /> : <Profile user={user} />}
         </Box>
       </Box>
     </Popover>

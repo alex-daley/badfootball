@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
@@ -37,6 +38,8 @@ function PlaceholderText({ content }) {
 }
 
 export default function App() {
+  const { isAuthenticated, isLoading, user } = useAuth0()
+
   const [competition, setCompetition] = useState()
   const [profileAnchorEl, setProfileAnchorEl] = useState()
 
@@ -76,7 +79,7 @@ export default function App() {
             </Typography>
             <Tooltip title="Your profile">
               <Button size="large" edge="start" color="inherit" onClick={handleUserProfileClick} endIcon={<AccountIcon/>}>
-                Login
+                {!isLoading && (isAuthenticated ? user.name : 'Login') }
               </Button>
             </Tooltip>
             <ProfilePopover open={Boolean(profileAnchorEl)} anchorEl={profileAnchorEl} onClose={handleUserProfileClose} />
