@@ -2,6 +2,7 @@ const fs = require('path')
 const express = require('express')
 const { auth } = require('express-oauth2-jwt-bearer')
 const api = require('./external-football-api')
+const db = require('./db')
 const Cache = require('./cache')
  
 require('dotenv').config()
@@ -16,13 +17,17 @@ function checkEnvironmentVariables() {
     errors.push('FOOTBALL_API_DOMAIN is not defined')
   }
   
+  if (!process.env.DB_PASSWORD) {
+    errors.push('DB_PASSWORD is not defined')
+  }
+
   if (errors.length > 0) {
     errors.push('Define these variables in a file named .env at this project\'s root folder.')
     throw Error(errors.join('\n'))
   }
 }
 
-const checkJwt = auth({
+let checkJwt = auth({
   audience: 'https://ws325813-atw2.remote.ac/api/',
   issuerBaseURL: `https://ws325813-atw2.eu.auth0.com/`
 })
@@ -32,10 +37,13 @@ module.exports = function createApp() {
   
   const app = express()
   const cache = new Cache()
+  const { insertStartingEleven, getStartingElevens } = db()
 
   const buildPath = fs.join(__dirname, 'build')
   console.log(`Serving client from: ${buildPath}`)
   app.use(express.static(buildPath))
+
+  app.use(express.json()) 
 
   app.get('/', (_, res) => {
     res.sendFile(fs.join(buildPath, 'index.html'))
@@ -55,8 +63,28 @@ module.exports = function createApp() {
     res.json(teams)
   })
 
-  app.get('/api/private', checkJwt, async(_, res) => {
-    res.send('You can only see this if you are authenticated')
+  app.post('/api/startingeleven', async(req, res) => {
+    const { userId, startingEleven } = req.body 
+    try {
+      const insertId = await insertStartingEleven(userId, startingEleven) 
+      res.status(201).json({ insertId })
+    }
+    catch(err) {
+      console.log(err)
+      res.status(500).send('Internal server error')
+    }
+  }) 
+
+  app.get('/api/startingeleven/:userId', checkJwt, async(req, res) => {
+    const { userId } = req.params
+    try {
+      const rows = await getStartingElevens(userId)
+      res.json(rows)
+    }
+    catch(err) {
+      console.log(err)
+      res.status(500).send('Internal server error')
+    }
   })
 
   return app

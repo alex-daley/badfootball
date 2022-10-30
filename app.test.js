@@ -1,4 +1,4 @@
-const axios = require('axios')
+const axios = require('axios') 
 const supertest = require('supertest')
 const createApp = require('./app')
 
@@ -6,6 +6,7 @@ const app = createApp()
 const request = supertest(app)
 
 jest.mock('axios')
+jest.mock('mariadb')
 
 describe('Mocked endpoint tests', () => {
   it('GET /api/competitions returns 200 status code and body', async () => {

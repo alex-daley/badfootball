@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, createRef } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box'
@@ -16,10 +16,12 @@ import AccountIcon from '@mui/icons-material/AccountCircle'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import CompetitionSelect from './CompetitionSelect'
 import TeamBuilder from './TeamBuilder'
+import WrappedAlert from './WrappedAlert'
 import ProfilePopover from './ProfilePopover'
 import useCompetitions from '../api/useCompetitions'
 import useTeamData from '../api/useTeamData'
 import useFormations from '../api/useFormations'
+import saveStartingEleven from '../api/saveStartingEleven'
 
 const theme = createTheme({
   palette: {
@@ -38,10 +40,12 @@ function PlaceholderText({ content }) {
 }
 
 export default function App() {
-  const { isAuthenticated, isLoading, user } = useAuth0()
+  const { isAuthenticated, isLoading, user, getAccessTokenSilently } = useAuth0()
+  const loginButtonRef = createRef()
 
   const [competition, setCompetition] = useState()
   const [profileAnchorEl, setProfileAnchorEl] = useState()
+  const [saveAlert, setSaveAlert] = useState(false)
 
   const {
     isLoading: isLoadingCompetitions,
@@ -55,8 +59,8 @@ export default function App() {
 
   const { formations } = useFormations()
 
-  const handleUserProfileClick = ({ currentTarget }) => {
-    setProfileAnchorEl(currentAnchorEl => currentAnchorEl ? null : currentTarget)
+  const handleUserProfileClick = () => {
+    setProfileAnchorEl(currentAnchorEl => currentAnchorEl ? null : loginButtonRef.current)
   }
   
   const handleUserProfileClose = () => {
@@ -65,6 +69,34 @@ export default function App() {
 
   const handleCompetitionSelect = (competition) => {
     setCompetition(competition)
+  }
+
+  const handleSave = async(_, { team, formation, startingEleven }) => {
+    if (!isAuthenticated) { 
+      handleUserProfileClick()
+      return 
+    }
+
+    const token = getAccessTokenSilently()
+    const userId = user.sub
+    const saveData = {
+      team: team.name,
+      formation: formation.name,
+      players: startingEleven.map(player => player.name ?? 'UNSET')
+    }
+
+    const { status } = await saveStartingEleven(token, userId, saveData)
+    if (status === 201) {
+      console.log('saved')
+      setSaveAlert(true)
+    }
+  } 
+
+  const handleLoad = () => {
+    if (!isAuthenticated) { 
+      handleUserProfileClick()
+      return 
+    }
   }
 
   return (
@@ -78,7 +110,7 @@ export default function App() {
               Badfootball
             </Typography>
             <Tooltip title="Your profile">
-              <Button size="large" edge="start" color="inherit" onClick={handleUserProfileClick} endIcon={<AccountIcon/>}>
+              <Button ref={loginButtonRef} size="large" edge="start" color="inherit" onClick={handleUserProfileClick} endIcon={<AccountIcon/>}>
                 {!isLoading && (isAuthenticated ? user.name : 'Login') }
               </Button>
             </Tooltip>
@@ -97,7 +129,7 @@ export default function App() {
               <Paper variant="outlined" sx={{ height: '100%', p: 2 }}>
                 {!competition
                   ? <PlaceholderText content="Please select a competition." />
-                  : !isLoadingTeamData && <TeamBuilder competitionName={competition.name} teams={teams} formations={formations} />}
+                  : !isLoadingTeamData && <TeamBuilder competitionName={competition.name} teams={teams} formations={formations} onSaveClick={handleSave} onLoadClick={handleLoad} />}
               </Paper>
             </Grid>
           </Grid>
@@ -106,7 +138,8 @@ export default function App() {
               Football data provided by the <Link variant="caption" href="https://www.football-data.org/">Football-Data.org API</Link>
             </Typography>
           </Box>
-        </Container>
+          <WrappedAlert open={saveAlert} message="Starting Eleven Saved!" onClose={() => setSaveAlert(false)}/>
+        </Container> 
       </Box>
     </ThemeProvider>
   )

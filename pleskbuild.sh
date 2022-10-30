@@ -13,6 +13,7 @@ echo Copying server production files to /plesk_out
 cp -a .env plesk_out
 cp -a app.js plesk_out
 cp -a cache.js plesk_out
+cp -a db.js plesk_out
 cp -a external-football-api.js plesk_out
 cp -a main.js plesk_out
 cp -a package.json plesk_out

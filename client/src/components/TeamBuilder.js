@@ -130,7 +130,7 @@ function FormationGrid({ formation, startingEleven, onClick, onRemove }) {
   return <>{gridItems}</>
 }
 
-export default function TeamBuilder({ competitionName, teams, formations }) {
+export default function TeamBuilder({ competitionName, teams, formations, onSaveClick, onLoadClick }) {
   const [team, setTeam] = useState(() => teams[0])
   const [formation, setFormation] = useState(() => formations[0])
   const [startingEleven, setStartingEleven] = useState(() => Array(11).fill({}))
@@ -179,6 +179,14 @@ export default function TeamBuilder({ competitionName, teams, formations }) {
   const handlePlayerSelectMenuClose = () => {
     setMenuAnchor()
     setStartingElevenUpdateIndex()
+  } 
+
+  const handleSaveClick = (event) => {
+    onSaveClick?.(event, { team, formation, startingEleven })
+  }
+
+  const handleLoadClick = (event) => {
+    onLoadClick?.(event)
   }
 
   return (
@@ -224,11 +232,11 @@ export default function TeamBuilder({ competitionName, teams, formations }) {
       </Grid>
       <Divider/>
       <Stack direction="row" spacing={1}  >
-        <Button color="secondary" disableElevation startIcon={<CloudDownloadIcon/>}>
+        <Button color="secondary" disableElevation onClick={handleLoadClick} startIcon={<CloudDownloadIcon/>}>
           Load 
         </Button>
         <Box sx={{ flexGrow: 1 }} />
-        <Button color="secondary" disableElevation startIcon={<CloudUploadIcon/>}>
+        <Button color="secondary" disableElevation onClick={handleSaveClick} startIcon={<CloudUploadIcon/>}>
           Save & Upload
         </Button>
         <Button color="secondary" disableElevation startIcon={<ShareIcon/>}>

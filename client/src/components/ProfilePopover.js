@@ -14,10 +14,10 @@ import Button from '@mui/material/Button'
 import Link from '@mui/material/Link'
 
 function Login() { 
-  const { loginWithRedirect } = useAuth0()
+  const { loginWithPopup } = useAuth0()
 
   const handleClick = () => {
-    loginWithRedirect()
+    loginWithPopup()
   }
 
   return (
