@@ -30,10 +30,11 @@ module.exports = function db() {
     let conn 
     try {
       conn = await pool.getConnection()
-      const rows = await conn.query('SELECT startingElevenId, startingElevenJSON FROM StartingEleven WHERE userId = ? LIMIT 1000', [ userId ])
+      const rows = await conn.query('SELECT startingElevenId, lastEdit, startingElevenJSON FROM StartingEleven WHERE userId = ? LIMIT 1000', [ userId ])
 
-      return rows.map(({ startingElevenId, startingElevenJSON }) => ({
+      return rows.map(({ startingElevenId, lastEdit, startingElevenJSON }) => ({
           id: startingElevenId,
+          lastEdit,
           ...(JSON.parse(startingElevenJSON))
         }
       ))

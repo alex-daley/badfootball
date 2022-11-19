@@ -25,7 +25,7 @@ export default function SaveDialog({ open, onClose, onCancel, onSave, saveContex
   }
 
   const handleSave = () => {
-    onSave?.()
+    onSave?.(saveName)
   }
 
   if (!saveContext.team || !saveContext.formation) {

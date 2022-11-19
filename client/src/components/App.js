@@ -23,6 +23,7 @@ import useCompetitions from '../api/useCompetitions'
 import useTeamData from '../api/useTeamData'
 import useFormations from '../api/useFormations'
 import saveStartingEleven from '../api/saveStartingEleven'
+import LoadDialog from './LoadDialog'
 
 const theme = createTheme({
   palette: {
@@ -48,7 +49,8 @@ export default function App() {
   const [profileAnchorEl, setProfileAnchorEl] = useState()
   const [saveAlert, setSaveAlert] = useState(false)
   const [saveDialog, setSaveDialog] = useState(false)
-  const [saveContext, setSaveContext] = useState({ team: undefined,  formation: undefined, startingEleven: [] })
+  const [saveContext, setSaveContext] = useState({ team: undefined, formation: undefined, startingEleven: [] })
+  const [loadDialog, setLoadDialog] = useState(false)
 
   const {
     isLoading: isLoadingCompetitions,
@@ -65,7 +67,7 @@ export default function App() {
   const handleUserProfileClick = () => {
     setProfileAnchorEl(currentAnchorEl => currentAnchorEl ? null : loginButtonRef.current)
   }
-  
+
   const handleUserProfileClose = () => {
     setProfileAnchorEl(null)
   }
@@ -78,50 +80,65 @@ export default function App() {
     setSaveDialog(false)
   }
 
-  const handleSaveDialogSave = async() => {
-    const token = getAccessTokenSilently()
+  const handleLoadDialogClose = () => {
+    setLoadDialog(false)
+  }
+
+  const handleSaveDialogSave = async (saveName) => {
+    const token = await getAccessTokenSilently()
     const userId = user.sub
     const saveData = {
+      saveName,
       team: saveContext.team.name,
       formation: saveContext.formation.name,
       players: saveContext.startingEleven.map(player => player.name ?? 'UNSET')
     }
 
     const { status } = await saveStartingEleven(token, userId, saveData)
-    console.log(status)
+    
     if (status === 201) {
       setSaveAlert(true)
     }
     handleSaveDialogClose()
   }
 
-  const handleSave = async(_, { team, formation, startingEleven }) => {
-    if (!isAuthenticated) { 
+  const handleSave = async (_, { team, formation, startingEleven }) => {
+    if (!isAuthenticated) {
       handleUserProfileClick()
-      return 
+      return
     }
 
     setSaveContext({ team, formation, startingEleven })
-    setSaveDialog(true) 
-  } 
+    setSaveDialog(true)
+  }
 
   const handleLoad = () => {
-    if (!isAuthenticated) { 
+    if (!isAuthenticated) {
       handleUserProfileClick()
-      return 
+      return
     }
+
+    setLoadDialog(true)
   }
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <SaveDialog 
-        open={saveDialog} 
-        onClose={handleSaveDialogClose} 
-        saveContext={saveContext} 
-        onSave={handleSaveDialogSave}
-        onCancel={handleSaveDialogClose}
-      />
+      {saveDialog && (
+        <SaveDialog
+          open={saveDialog}
+          onClose={handleSaveDialogClose}
+          saveContext={saveContext}
+          onSave={handleSaveDialogSave}
+          onCancel={handleSaveDialogClose}
+        />
+      )}
+      {loadDialog && (
+        <LoadDialog
+          open={loadDialog}
+          onClose={handleLoadDialogClose}
+        />
+      )}
       <Box sx={{ height: '100%' }} >
         <AppBar position="relative" elevation={0}>
           <Toolbar variant="dense" sx={{ width: '100%', maxWidth: 'lg', mx: 'auto' }}>
@@ -130,8 +147,8 @@ export default function App() {
               Badfootball
             </Typography>
             <Tooltip title="Your profile">
-              <Button ref={loginButtonRef} size="large" edge="start" color="inherit" onClick={handleUserProfileClick} endIcon={<AccountIcon/>}>
-                {!isLoading && (isAuthenticated ? user.name : 'Login') }
+              <Button ref={loginButtonRef} size="large" edge="start" color="inherit" onClick={handleUserProfileClick} endIcon={<AccountIcon />}>
+                {!isLoading && (isAuthenticated ? user.name : 'Login')}
               </Button>
             </Tooltip>
             <ProfilePopover open={Boolean(profileAnchorEl)} anchorEl={profileAnchorEl} onClose={handleUserProfileClose} />
@@ -158,8 +175,8 @@ export default function App() {
               Football data provided by the <Link variant="caption" href="https://www.football-data.org/">Football-Data.org API</Link>
             </Typography>
           </Box>
-          <WrappedAlert open={saveAlert} message="Starting Eleven Saved!" onClose={() => setSaveAlert(false)}/>
-        </Container> 
+          <WrappedAlert open={saveAlert} message="Starting Eleven Saved!" onClose={() => setSaveAlert(false)} />
+        </Container>
       </Box>
     </ThemeProvider>
   )

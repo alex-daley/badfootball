@@ -28,7 +28,7 @@ function checkEnvironmentVariables() {
 }
 
 let checkJwt = auth({
-  audience: 'https://ws325813-atw2.remote.ac/api/',
+  audience: ['https://ws325813-atw2.remote.ac/api/'],
   issuerBaseURL: `https://ws325813-atw2.eu.auth0.com/`
 })
 
@@ -75,10 +75,11 @@ module.exports = function createApp() {
     }
   }) 
 
-  app.get('/api/startingeleven/:userId', checkJwt, async(req, res) => {
+  app.get('/api/startingeleven/:userId', async(req, res) => {
     const { userId } = req.params
+     
     try {
-      const rows = await getStartingElevens(userId)
+      const rows = await getStartingElevens(userId) 
       res.json(rows)
     }
     catch(err) {
