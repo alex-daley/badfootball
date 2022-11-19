@@ -18,6 +18,7 @@ import CompetitionSelect from './CompetitionSelect'
 import TeamBuilder from './TeamBuilder'
 import WrappedAlert from './WrappedAlert'
 import ProfilePopover from './ProfilePopover'
+import SaveDialog from './SaveDialog'
 import useCompetitions from '../api/useCompetitions'
 import useTeamData from '../api/useTeamData'
 import useFormations from '../api/useFormations'
@@ -46,6 +47,8 @@ export default function App() {
   const [competition, setCompetition] = useState()
   const [profileAnchorEl, setProfileAnchorEl] = useState()
   const [saveAlert, setSaveAlert] = useState(false)
+  const [saveDialog, setSaveDialog] = useState(false)
+  const [saveContext, setSaveContext] = useState({ team: undefined,  formation: undefined, startingEleven: [] })
 
   const {
     isLoading: isLoadingCompetitions,
@@ -71,25 +74,35 @@ export default function App() {
     setCompetition(competition)
   }
 
+  const handleSaveDialogClose = () => {
+    setSaveDialog(false)
+  }
+
+  const handleSaveDialogSave = async() => {
+    const token = getAccessTokenSilently()
+    const userId = user.sub
+    const saveData = {
+      team: saveContext.team.name,
+      formation: saveContext.formation.name,
+      players: saveContext.startingEleven.map(player => player.name ?? 'UNSET')
+    }
+
+    const { status } = await saveStartingEleven(token, userId, saveData)
+    console.log(status)
+    if (status === 201) {
+      setSaveAlert(true)
+    }
+    handleSaveDialogClose()
+  }
+
   const handleSave = async(_, { team, formation, startingEleven }) => {
     if (!isAuthenticated) { 
       handleUserProfileClick()
       return 
     }
 
-    const token = getAccessTokenSilently()
-    const userId = user.sub
-    const saveData = {
-      team: team.name,
-      formation: formation.name,
-      players: startingEleven.map(player => player.name ?? 'UNSET')
-    }
-
-    const { status } = await saveStartingEleven(token, userId, saveData)
-    if (status === 201) {
-      console.log('saved')
-      setSaveAlert(true)
-    }
+    setSaveContext({ team, formation, startingEleven })
+    setSaveDialog(true) 
   } 
 
   const handleLoad = () => {
@@ -102,6 +115,13 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <SaveDialog 
+        open={saveDialog} 
+        onClose={handleSaveDialogClose} 
+        saveContext={saveContext} 
+        onSave={handleSaveDialogSave}
+        onCancel={handleSaveDialogClose}
+      />
       <Box sx={{ height: '100%' }} >
         <AppBar position="relative" elevation={0}>
           <Toolbar variant="dense" sx={{ width: '100%', maxWidth: 'lg', mx: 'auto' }}>
