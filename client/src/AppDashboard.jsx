@@ -4,6 +4,7 @@ import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import Attribution from './Attribution'
+import FormationGrid from './FormationGrid'
 import SelectCompetition from './SelectCompetition'
 import SelectTeam from './SelectTeam'
 import SelectFormation from './SelectFormation'
@@ -27,7 +28,11 @@ function GridPaper({ xs, md, children }) {
 
 function Section({ title, children }) {
   return (
-    <Stack>
+    <Stack
+      sx={{
+        height: '100%'
+      }}
+    >
       <Typography
         compoentn="div"
         variant="caption"
@@ -86,6 +91,9 @@ export default function AppDashboard({
                 />
               </Box>
             </Stack>
+            <FormationGrid
+              formation={state.formationSelected}
+            />
           </Section>
         </GridPaper>)}
     </Grid>

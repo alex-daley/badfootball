@@ -15,7 +15,7 @@ export default function SelectCompetition({ competitionSelected, competitions, o
       dense
       sx={{
         height: {
-          xs: 250,
+          xs: 180,
           md: 'unset'
         },
         overflow: 'auto'
