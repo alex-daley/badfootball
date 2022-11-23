@@ -17,7 +17,7 @@ const theme = createTheme({
     }
   }
 })
-
+ 
 export default function App() {
   const {
     isAuthenticated,
@@ -25,7 +25,7 @@ export default function App() {
     loginWithPopup,
     logout
   } = useAuth0()
-
+ 
   const [competitions, setCompetitions] = useState()
   const [competitionSelected, setCompetitionSelected] = useState()
   const [teams, setTeams] = useState()
@@ -33,7 +33,7 @@ export default function App() {
   const [loadingTeams, setLoadingTeams] = useState(true)
   const [formationSelected, setFormationSelected] = useState(FORMATIONS[0])
 
-  useEffect(() => {
+  useEffect(() => { 
     getCompetitions().then(competitions => {
       setCompetitions(competitions)
       setCompetitionSelected(competitions[0])
@@ -42,7 +42,7 @@ export default function App() {
         setTeamSelected(teams[0])
         setLoadingTeams(false)
       })
-    })
+    }) 
   }, []) 
 
   function handleAccountClick() {

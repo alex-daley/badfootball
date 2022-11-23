@@ -2,6 +2,7 @@ import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import FootballPlayerAvatar from './FootballPlayerAvatar'
 
 const MAX_GRID_BREAKPOINT = 12
 
@@ -34,7 +35,9 @@ export default function FormationGrid({
                 alignItems: 'center'
               }}
             >
-              <Box>{position}</Box>
+              <FootballPlayerAvatar
+                position={position}
+              />
             </Box>
           </Grid>
         )
