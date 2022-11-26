@@ -7,7 +7,11 @@ import FootballPlayerAvatar from './FootballPlayerAvatar'
 const MAX_GRID_BREAKPOINT = 12
 
 export default function FormationGrid({
-  formation
+  formation,
+  startingXI,
+  teamEmblem,
+  onClick,
+  onClear
 }) {
   // If we're running on a device with a narrow screen, we need to specify an absolute grid height.
   const theme = useTheme()
@@ -20,6 +24,8 @@ export default function FormationGrid({
   for (const [position, numPlayers] of formation.layout) {
     for (let rowIndex = 0; rowIndex < numPlayers; rowIndex++) {
         playerIndex++
+
+        const idx = playerIndex
 
         const width = MAX_GRID_BREAKPOINT / numPlayers
         rows.push(
@@ -37,6 +43,10 @@ export default function FormationGrid({
             >
               <FootballPlayerAvatar
                 position={position}
+                player={startingXI[idx]}
+                emblem={teamEmblem}
+                onClick={event => onClick(event, idx)}
+                onClear={() => onClear(idx)}
               />
             </Box>
           </Grid>

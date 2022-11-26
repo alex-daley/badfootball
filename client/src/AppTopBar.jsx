@@ -29,8 +29,7 @@ const AppTopBar = forwardRef(({
 
   return (
     <AppBar 
-      position="relative"
-      elevation={0}
+      position="relative" 
     >
       <Toolbar
         variant="dense"

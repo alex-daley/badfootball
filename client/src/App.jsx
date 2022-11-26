@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import AppDashboard from './AppDashboard'
-import AppTopBar from './AppTopBar'
+import AppTopBar from './AppTopBar' 
 import FORMATIONS from './formations'
 import getCompetitions from './api/getCompetitions'
 import getTeams from './api/getTeams'
@@ -17,7 +17,7 @@ const theme = createTheme({
     }
   }
 })
- 
+
 export default function App() {
   const {
     isAuthenticated,
@@ -32,7 +32,8 @@ export default function App() {
   const [teamSelected, setTeamSelected] = useState()
   const [loadingTeams, setLoadingTeams] = useState(true)
   const [formationSelected, setFormationSelected] = useState(FORMATIONS[0])
-
+  const [startingXI, setStartingXI] = useState(Array(11).fill())
+  
   useEffect(() => { 
     getCompetitions().then(competitions => {
       setCompetitions(competitions)
@@ -55,6 +56,7 @@ export default function App() {
     getTeams(competition.code).then(teams => {
       setTeams(teams)
       setTeamSelected(teams[0])
+      setStartingXI(() => Array(11).fill())
       setLoadingTeams(false)
     })
   } 
@@ -66,6 +68,22 @@ export default function App() {
   function handleFormationClick(formationSelected) {
     setFormationSelected(formationSelected)
   } 
+
+  function handleStartingElevenPlayerClick(playerIndex, player) {
+    setStartingXI(players => { 
+      const slice = players.slice()
+      slice[playerIndex] = player 
+      return slice
+    })
+  }
+
+  function handleStartingElevenPlayerClear(playerIndex) {
+    setStartingXI(players => {
+      const slice = players.slice()
+      slice[playerIndex] = undefined 
+      return slice
+    })
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -90,11 +108,14 @@ export default function App() {
               teams,
               teamSelected,
               formations: FORMATIONS,
-              formationSelected
+              formationSelected,
+              startingXI
             }}
             onCompetitionSelect={handleCompetitionClick}
             onTeamSelect={handleTeamClick}
             onFormationSelect={handleFormationClick}
+            onStartingElevenPlayerSelect={handleStartingElevenPlayerClick}
+            onStartingElevenPlayerClear={handleStartingElevenPlayerClear}
           />
         </Container>
       </Box>
