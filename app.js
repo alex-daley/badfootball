@@ -37,7 +37,7 @@ module.exports = function createApp() {
   
   const app = express()
   const cache = new Cache()
-  const { insertStartingEleven, getStartingElevens } = db()
+  const { insertStartingEleven, getStartingElevens, deleteStartingEleven } = db()
 
   const buildPath = fs.join(__dirname, 'build')
   console.log(`Serving client from: ${buildPath}`)
@@ -81,6 +81,19 @@ module.exports = function createApp() {
     try {
       const rows = await getStartingElevens(userId) 
       res.json(rows)
+    }
+    catch(err) {
+      console.log(err)
+      res.status(500).send('Internal server error')
+    }
+  })
+
+  app.delete('/api/startingeleven/:startingElevenId', async(req, res) => {
+    const { startingElevenId } = req.params
+     
+    try {
+      await deleteStartingEleven(startingElevenId) 
+      res.status(202).send()
     }
     catch(err) {
       console.log(err)

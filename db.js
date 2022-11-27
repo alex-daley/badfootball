@@ -47,8 +47,23 @@ module.exports = function db() {
     }
   }
 
+  async function deleteStartingEleven(startingElevenId) {
+    let conn 
+    try {
+      conn = await pool.getConnection()
+      await conn.query('DELETE FROM StartingEleven WHERE startingElevenId = ?', [ startingElevenId ])
+    }
+    catch (err) {
+      throw err
+    }
+    finally {
+      if (conn) conn.end()
+    }
+  }
+
   return {
     insertStartingEleven,
-    getStartingElevens
+    getStartingElevens,
+    deleteStartingEleven
   }
 }
