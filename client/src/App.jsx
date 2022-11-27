@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react'
+import { createRef, useState, useEffect } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
+import { createTheme, ThemeProvider } from '@mui/material/styles' 
 import CssBaseline from '@mui/material/CssBaseline'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
+import Snackbar from '@mui/material/Snackbar'
 import AppDashboard from './AppDashboard'
-import AppTopBar from './AppTopBar' 
+import AppTopBar from './AppTopBar'
+import LoginInfoPopover from './LoginInfoPopover'
 import FORMATIONS from './formations'
 import getCompetitions from './api/getCompetitions'
 import getTeams from './api/getTeams'
+import postStartingEleven from './api/postStartingEleven'
 
 const theme = createTheme({
   palette: {
@@ -23,9 +26,15 @@ export default function App() {
     isAuthenticated,
     user,
     loginWithPopup,
-    logout
+    logout,
+    getAccessTokenSilently
   } = useAuth0()
- 
+
+  const loginButtonRef = createRef()
+  const [loginInfoOpen, setLoginInfoOpen] = useState(false)
+  const [loginInfoAnchor, setLoginInfoAnchor] = useState()
+
+  const [saveAlert, setSaveAlert] = useState(false)
   const [competitions, setCompetitions] = useState()
   const [competitionSelected, setCompetitionSelected] = useState()
   const [teams, setTeams] = useState()
@@ -33,8 +42,8 @@ export default function App() {
   const [loadingTeams, setLoadingTeams] = useState(true)
   const [formationSelected, setFormationSelected] = useState(FORMATIONS[0])
   const [startingXI, setStartingXI] = useState(Array(11).fill())
-  
-  useEffect(() => { 
+
+  useEffect(() => {
     getCompetitions().then(competitions => {
       setCompetitions(competitions)
       setCompetitionSelected(competitions[0])
@@ -43,12 +52,17 @@ export default function App() {
         setTeamSelected(teams[0])
         setLoadingTeams(false)
       })
-    }) 
-  }, []) 
+    })
+  }, [])
 
   function handleAccountClick() {
-    if (isAuthenticated) logout()
-    else loginWithPopup()
+    if (isAuthenticated) {
+      logout()
+    }
+    else {
+      setLoginInfoOpen(false)
+      loginWithPopup()
+    }
   }
 
   function handleCompetitionClick(competition) {
@@ -59,20 +73,20 @@ export default function App() {
       setStartingXI(() => Array(11).fill())
       setLoadingTeams(false)
     })
-  } 
+  }
 
   function handleTeamClick(teamSelected) {
     setTeamSelected(teamSelected)
   }
-  
+
   function handleFormationClick(formationSelected) {
     setFormationSelected(formationSelected)
-  } 
+  }
 
   function handleStartingElevenPlayerClick(playerIndex, player) {
-    setStartingXI(players => { 
+    setStartingXI(players => {
       const slice = players.slice()
-      slice[playerIndex] = player 
+      slice[playerIndex] = player
       return slice
     })
   }
@@ -80,9 +94,40 @@ export default function App() {
   function handleStartingElevenPlayerClear(playerIndex) {
     setStartingXI(players => {
       const slice = players.slice()
-      slice[playerIndex] = undefined 
+      slice[playerIndex] = undefined
       return slice
     })
+  }
+
+  async function handleSaveClick() {
+    if (!isAuthenticated) {
+      setLoginInfoOpen(true)
+      setLoginInfoAnchor(loginButtonRef.current)
+    } 
+    else {
+      setSaveAlert(false)
+
+      const token = await getAccessTokenSilently()
+      const userId = user.sub 
+      const saveData = {
+        team: teamSelected.name,
+        formation: formationSelected.name,
+        players: startingXI.map(player => player?.name ?? 'UNSET')
+      }
+      
+      const { status } = await postStartingEleven(userId, token, saveData)
+
+      if (status === 201) {
+        setSaveAlert(true)
+      }
+    }
+  }
+
+  function handleLoadClick() {
+    if (!isAuthenticated) {
+      setLoginInfoOpen(true)
+      setLoginInfoAnchor(loginButtonRef.current)
+    }
   }
 
   return (
@@ -93,13 +138,29 @@ export default function App() {
           isAuthenticated={isAuthenticated}
           onAccountClick={handleAccountClick}
           user={user}
+          ref={loginButtonRef}
         />
+        {loginInfoAnchor && (
+          <LoginInfoPopover
+            open={loginInfoOpen}
+            anchorEl={loginInfoAnchor}
+            onClose={() => setLoginInfoOpen(false)}
+            onClick={handleAccountClick}
+          />
+        )}
         <Container
           sx={{
             mt: { xs: 2, md: 6 },
             width: '100%'
           }}
         >
+          <Snackbar
+            open={saveAlert}
+            autoHideDuration={3000}
+            onClose={() => setSaveAlert(false)}
+            message="Starting Eleven Saved!"
+          />
+
           <AppDashboard
             state={{
               competitions,
@@ -116,6 +177,8 @@ export default function App() {
             onFormationSelect={handleFormationClick}
             onStartingElevenPlayerSelect={handleStartingElevenPlayerClick}
             onStartingElevenPlayerClear={handleStartingElevenPlayerClear}
+            onSaveClick={handleSaveClick}
+            onLoadClick={handleLoadClick}
           />
         </Container>
       </Box>

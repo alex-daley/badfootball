@@ -55,7 +55,7 @@ export default function FootbalPlayerAvatar({
                     color: theme.palette.error.main
                   }}
                 >
-                  Invalid Position
+                  Out of position
                 </Typography>
                 <IconButton
                   aria-label="clear"

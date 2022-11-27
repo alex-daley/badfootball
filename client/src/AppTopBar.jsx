@@ -11,12 +11,12 @@ const AppTopBar = forwardRef(({
   isAuthenticated,
   onAccountClick,
   user
-}, accountButtonRef) => {
+}, ref) => {
   const accountText = isAuthenticated ? 'Logout' : 'Login'
 
   const accountButton = (
     <Button
-      ref={accountButtonRef}
+      ref={ref}
       size="large"
       edge="start"
       color="inherit"

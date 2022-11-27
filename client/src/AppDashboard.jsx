@@ -4,6 +4,9 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
+import Button from '@mui/material/Button'
+import SaveIcon from '@mui/icons-material/Save' 
+import DownloadIcon from '@mui/icons-material/Download'
 import Attribution from './Attribution'
 import FormationGrid from './FormationGrid'
 import SelectCompetition from './SelectCompetition'
@@ -46,6 +49,30 @@ function Section({ title, children }) {
   )
 }
 
+function SaveButton({ onClick }) {
+  return (
+    <Button 
+      startIcon={<SaveIcon/>}
+      onClick={onClick} 
+      color="secondary"
+    >
+      Save
+    </Button>
+  )
+}
+
+function LoadButton({ onClick }) {
+  return (
+    <Button 
+      startIcon={<DownloadIcon/>}
+      onClick={onClick} 
+      color="secondary"
+    >
+      Load
+    </Button>
+  )
+}
+ 
 function filterSelectablePlayers(teamSelected, positionName) {
   if (!teamSelected || !teamSelected.squad || !positionName) return []
   return teamSelected.squad.filter(player => player.position === positionName)
@@ -71,7 +98,9 @@ export default function AppDashboard({
   onTeamSelect,
   onFormationSelect,
   onStartingElevenPlayerSelect,
-  onStartingElevenPlayerClear
+  onStartingElevenPlayerClear,
+  onSaveClick,
+  onLoadClick
 }) {
   const [updateData, setUpdateData] = useState(null)
 
@@ -94,6 +123,14 @@ export default function AppDashboard({
     if (index) {
       closePlayerSelect()
     }
+  }
+
+  function handleSaveClick() {
+    onSaveClick()
+  } 
+
+  function handleLoadClick() {
+    onLoadClick()
   }
 
   return (
@@ -156,6 +193,21 @@ export default function AppDashboard({
                 onClick={handleUpdateInit}
                 onClear={onStartingElevenPlayerClear}
               />
+              <Stack
+                direction="row"
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <LoadButton onClick={handleLoadClick} /> 
+                <Stack
+                  direction="row"
+                  spacing={2} 
+                >
+                  <SaveButton onClick={handleSaveClick} /> 
+                </Stack>
+              </Stack>
             </Section>
           </GridPaper>)}
       </Grid>

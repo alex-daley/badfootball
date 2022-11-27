@@ -1,4 +1,4 @@
-export default async function saveStartingEleven(userId, accessToken, startingEleven) {
+export default async function postStartingEleven(userId, accessToken, startingEleven) {
   const res = await fetch('/api/startingeleven', {
     method: 'POST',
     headers: {
