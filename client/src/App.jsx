@@ -14,6 +14,7 @@ import getCompetitions from './api/getCompetitions'
 import getTeams from './api/getTeams'
 import postStartingEleven from './api/postStartingEleven'
 import deleteStartingEleven from './api/deleteStartingEleven'
+import updateStartingEleven from './api/updateStartingEleven'
 
 const theme = createTheme({
   palette: {
@@ -46,6 +47,7 @@ export default function App() {
   const [loadingTeams, setLoadingTeams] = useState(true)
   const [formationSelected, setFormationSelected] = useState(FORMATIONS[0])
   const [startingXI, setStartingXI] = useState(Array(11).fill())
+  const [saveId, setSaveId] = useState()
 
   useEffect(() => {
     getCompetitions().then(competitions => {
@@ -102,7 +104,7 @@ export default function App() {
       return slice
     })
   }
-
+ 
   async function handleSaveClick() {
     if (!isAuthenticated) {
       setLoginInfoOpen(true)
@@ -120,9 +122,19 @@ export default function App() {
         competition: competitionSelected.name
       }
 
-      const { status } = await postStartingEleven(userId, token, saveData)
+      let response 
+      if (!saveId) {
+        response = await postStartingEleven(userId, token, saveData)
+        if (response.status === 201) {
+          const { insertId } = await response.json()
+          setSaveId(insertId)
+        }
+      }
+      else {
+        response = await updateStartingEleven(saveId, token, saveData)
+      }
 
-      if (status === 201) {
+      if (response.status === 201) {
         setSaveAlert(true)
       }
     }
@@ -156,6 +168,7 @@ export default function App() {
     setFormationSelected(formation)
 
     setStartingXI(startingEleven.players.map(player => player === 'UNSET' ? undefined : player))
+    setSaveId(startingEleven.id)
   }
 
   return (
@@ -217,6 +230,7 @@ export default function App() {
             onStartingElevenPlayerClear={handleStartingElevenPlayerClear}
             onSaveClick={handleSaveClick}
             onLoadClick={handleLoadClick}
+            saveId={saveId}
           />
         </Container>
       </Box>

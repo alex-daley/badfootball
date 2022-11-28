@@ -37,7 +37,12 @@ module.exports = function createApp() {
   
   const app = express()
   const cache = new Cache()
-  const { insertStartingEleven, getStartingElevens, deleteStartingEleven } = db()
+  const { 
+    insertStartingEleven, 
+    getStartingElevens, 
+    deleteStartingEleven, 
+    updateStartingEleven 
+  } = db()
 
   const buildPath = fs.join(__dirname, 'build')
   console.log(`Serving client from: ${buildPath}`)
@@ -74,6 +79,19 @@ module.exports = function createApp() {
       res.status(500).send('Internal server error')
     }
   }) 
+
+  app.put('/api/startingeleven', async(req, res) => {
+    const { startingElevenId, startingEleven } = req.body 
+    try {
+      await updateStartingEleven(startingElevenId, startingEleven) 
+      res.status(201).json({ startingElevenId })
+    }
+    catch(err) {
+      console.log(err)
+      res.status(500).send('Internal server error')
+    }
+  }) 
+
 
   app.get('/api/startingeleven/:userId', async(req, res) => {
     const { userId } = req.params

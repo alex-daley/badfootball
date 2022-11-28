@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
-import SaveIcon from '@mui/icons-material/Save' 
+import SaveIcon from '@mui/icons-material/Save'
 import DownloadIcon from '@mui/icons-material/Download'
 import Attribution from './Attribution'
 import FormationGrid from './FormationGrid'
@@ -18,12 +18,12 @@ import normalisePositionNaming from './api/normaliseNaming'
 function GridPaper({ xs, md, children }) {
   return (
     <Grid item xs={xs} md={md}>
-      <Paper 
+      <Paper
         elevation={6}
         sx={{
           height: '100%',
           p: 2
-        }} 
+        }}
       >
         {children}
       </Paper>
@@ -51,9 +51,9 @@ function Section({ title, children }) {
 
 function SaveButton({ onClick }) {
   return (
-    <Button 
-      startIcon={<SaveIcon/>}
-      onClick={onClick} 
+    <Button
+      startIcon={<SaveIcon />}
+      onClick={onClick}
       color="secondary"
     >
       Save
@@ -63,16 +63,16 @@ function SaveButton({ onClick }) {
 
 function LoadButton({ onClick }) {
   return (
-    <Button 
-      startIcon={<DownloadIcon/>}
-      onClick={onClick} 
+    <Button
+      startIcon={<DownloadIcon />}
+      onClick={onClick}
       color="secondary"
     >
       Load
     </Button>
   )
 }
- 
+
 function filterSelectablePlayers(teamSelected, positionName) {
   if (!teamSelected || !teamSelected.squad || !positionName) return []
   return teamSelected.squad.filter(player => player.position === positionName)
@@ -100,7 +100,8 @@ export default function AppDashboard({
   onStartingElevenPlayerSelect,
   onStartingElevenPlayerClear,
   onSaveClick,
-  onLoadClick
+  onLoadClick,
+  saveId
 }) {
   const [updateData, setUpdateData] = useState(null)
 
@@ -108,7 +109,7 @@ export default function AppDashboard({
     setUpdateData(data => ({ ...data, open: false }))
   }
 
-  function handleUpdateInit(event, playerIndex) { 
+  function handleUpdateInit(event, playerIndex) {
     setUpdateData({
       anchorEl: event.currentTarget,
       open: true,
@@ -127,7 +128,7 @@ export default function AppDashboard({
 
   function handleSaveClick() {
     onSaveClick()
-  } 
+  }
 
   function handleLoadClick() {
     onLoadClick()
@@ -200,12 +201,23 @@ export default function AppDashboard({
                   justifyContent: 'space-between'
                 }}
               >
-                <LoadButton onClick={handleLoadClick} /> 
                 <Stack
                   direction="row"
-                  spacing={2} 
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
                 >
-                  <SaveButton onClick={handleSaveClick} /> 
+                  <LoadButton onClick={handleLoadClick} />
+                  {saveId && (
+                    <Typography>{`Current save id: ${saveId}`}</Typography>
+                  )}
+                </Stack>
+                <Stack
+                  direction="row"
+                  spacing={2}
+                >
+                  <SaveButton onClick={handleSaveClick} />
                 </Stack>
               </Stack>
             </Section>

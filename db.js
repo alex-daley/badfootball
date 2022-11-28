@@ -26,6 +26,20 @@ module.exports = function db() {
     }
   }
 
+  async function updateStartingEleven(startingElevenId, startingEleven) {
+    let conn 
+    try {
+      conn = await pool.getConnection()
+      await conn.query('UPDATE StartingEleven SET startingElevenJSON = ? WHERE startingElevenId = ?', [ JSON.stringify(startingEleven), startingElevenId ])   
+    } 
+    catch (err) {
+      throw err 
+    } 
+    finally {
+      if (conn) conn.end()
+    }
+  }
+
   async function getStartingElevens(userId) {
     let conn 
     try {
@@ -63,6 +77,7 @@ module.exports = function db() {
 
   return {
     insertStartingEleven,
+    updateStartingEleven,
     getStartingElevens,
     deleteStartingEleven
   }
