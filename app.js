@@ -40,6 +40,7 @@ module.exports = function createApp() {
   const { 
     insertStartingEleven, 
     getStartingElevens, 
+    getStartingElevenById,
     deleteStartingEleven, 
     updateStartingEleven 
   } = db()
@@ -99,6 +100,28 @@ module.exports = function createApp() {
     try {
       const rows = await getStartingElevens(userId) 
       res.json(rows)
+    }
+    catch(err) {
+      console.log(err)
+      res.status(500).send('Internal server error')
+    }
+  })
+
+  app.get('/api/startingeleven/shared/:shareId', async(req, res) => {
+    const { shareId } = req.params
+    const shareIdInt = parseInt(shareId)
+    if (Number.isNaN(shareIdInt)) {
+      res.status(400).send('Invalid shareId')
+      return
+    }
+
+    try {
+      const rows = await getStartingElevenById(shareIdInt)
+      if (rows === null) {
+        res.status(500).send()
+      } else {
+        res.json(rows)
+      }
     }
     catch(err) {
       console.log(err)

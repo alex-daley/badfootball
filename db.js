@@ -61,6 +61,27 @@ module.exports = function db() {
     }
   }
 
+  async function getStartingElevenById(shareId) {
+    let conn 
+    try {
+      conn = await pool.getConnection()
+      const rows = await conn.query('SELECT startingElevenId, lastEdit, startingElevenJSON FROM StartingEleven WHERE startingElevenId = ?', [ shareId ])
+      if (!rows.length) {
+        return null
+      }
+      
+      const result = rows[0]
+      return {
+        id: result.startingElevenId,
+        lastEdit: result.lastEdit,
+        ...(JSON.parse(result.startingElevenJSON))
+      }
+    }
+    finally {
+      if (conn) conn.end()
+    }
+  }
+
   async function deleteStartingEleven(startingElevenId) {
     let conn 
     try {
@@ -79,6 +100,7 @@ module.exports = function db() {
     insertStartingEleven,
     updateStartingEleven,
     getStartingElevens,
+    getStartingElevenById,
     deleteStartingEleven
   }
 }

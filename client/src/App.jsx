@@ -14,8 +14,10 @@ import LoadDialog from './LoadDialog'
 import FORMATIONS from './formations'
 import ConfirmDialog from './ConfirmDialog'
 
+import readQueryStrings from './readQueryStrings'
 import getCompetitions from './api/getCompetitions'
 import getTeams from './api/getTeams'
+import getStartingElevenById from './api/getStartingElevenById'
 import postStartingEleven from './api/postStartingEleven'
 import deleteStartingEleven from './api/deleteStartingEleven'
 import updateStartingEleven from './api/updateStartingEleven'
@@ -63,6 +65,29 @@ export default function App() {
         setTeams(teams)
         setTeamSelected(teams[0])
         setLoadingTeams(false)
+
+        // If we have a '?share' query string, attempt to load that saved starting eleven.
+        const queryStrings = readQueryStrings()
+        if (queryStrings['share']) {
+          const lookupId = queryStrings['share']
+          window.history.replaceState(null, null, window.location.pathname)
+          
+          getStartingElevenById(lookupId)
+            .then(async(startingEleven) => {
+              const competition = competitions.find(competition => competition.name === startingEleven.competition)
+              setCompetitionSelected(competition)
+
+              const teams = await getTeams(competition.code)
+              const team = teams.find(team => team.name === startingEleven.team)
+              setTeams(teams)
+              setTeamSelected(team)
+
+              const formation = FORMATIONS.find(formation => formation.name === startingEleven.formation)
+              setFormationSelected(formation)
+              setStartingXI(startingEleven.players.map(player => player === 'UNSET' ? undefined : player))
+            })
+            .catch(() => console.log('Invalid starting eleven'))
+        }
       })
     })
   }, [])
@@ -121,8 +146,8 @@ export default function App() {
       return
     }
 
-    const updateState = () => { 
-      setTeamSelected(team) 
+    const updateState = () => {
+      setTeamSelected(team)
       setStartingXI(() => Array(11).fill(undefined))
     }
 
@@ -207,18 +232,18 @@ export default function App() {
   }
 
   async function handleLoadSelected(startingEleven) {
-    const updateState = async() => { 
+    const updateState = async () => {
       const competition = competitions.find(competition => competition.name === startingEleven.competition)
       setCompetitionSelected(competition)
-  
+
       const teams = await getTeams(competition.code)
       const team = teams.find(team => team.name === startingEleven.team)
       setTeams(teams)
       setTeamSelected(team)
-  
+
       const formation = FORMATIONS.find(formation => formation.name === startingEleven.formation)
       setFormationSelected(formation)
-  
+
       setStartingXI(startingEleven.players.map(player => player === 'UNSET' ? undefined : player))
       setSaveId(startingEleven.id)
     }
