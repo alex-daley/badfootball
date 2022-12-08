@@ -7,6 +7,7 @@ import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
 import SaveIcon from '@mui/icons-material/Save'
 import DownloadIcon from '@mui/icons-material/Download'
+import ShareIcon from '@mui/icons-material/Share'
 import Attribution from './Attribution'
 import FormationGrid from './FormationGrid'
 import SelectCompetition from './SelectCompetition'
@@ -73,6 +74,18 @@ function LoadButton({ onClick }) {
   )
 }
 
+function ShareButton({ onClick }) {
+  return (
+    <Button
+      startIcon={<ShareIcon />}
+      onClick={onClick}
+      color="secondary"
+    >
+      Share 
+    </Button>
+  )
+}
+
 function filterSelectablePlayers(teamSelected, positionName) {
   if (!teamSelected || !teamSelected.squad || !positionName) return []
   return teamSelected.squad.filter(player => player.position === positionName)
@@ -101,6 +114,7 @@ export default function AppDashboard({
   onStartingElevenPlayerClear,
   onSaveClick,
   onLoadClick,
+  onShareClick,
   saveId
 }) {
   const [updateData, setUpdateData] = useState(null)
@@ -132,6 +146,10 @@ export default function AppDashboard({
 
   function handleLoadClick() {
     onLoadClick()
+  }
+
+  function handleShareClick() {
+    onShareClick()
   }
 
   return (
@@ -210,13 +228,14 @@ export default function AppDashboard({
                 >
                   <LoadButton onClick={handleLoadClick} />
                   {saveId && (
-                    <Typography>{`Current save id: ${saveId}`}</Typography>
+                    <Typography variant="caption">{`Current save id: ${saveId}`}</Typography>
                   )}
                 </Stack>
                 <Stack
                   direction="row"
                   spacing={2}
                 >
+                  <ShareButton onClick={handleShareClick} />
                   <SaveButton onClick={handleSaveClick} />
                 </Stack>
               </Stack>

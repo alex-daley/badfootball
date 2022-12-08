@@ -47,6 +47,7 @@ export default function App() {
   const [overwriteDialogOpen, setOverwriteDialogOpen] = useState(false)
   const [nextStateMutation, setNextStateMutation] = useState()
 
+  const [shareAlert, setShareAlert] = useState(false)
   const [saveAlert, setSaveAlert] = useState(false)
   const [competitions, setCompetitions] = useState()
   const [competitionSelected, setCompetitionSelected] = useState()
@@ -73,7 +74,7 @@ export default function App() {
           window.history.replaceState(null, null, window.location.pathname)
           
           getStartingElevenById(lookupId)
-            .then(async(startingEleven) => {
+            .then(async(startingEleven) => { 
               const competition = competitions.find(competition => competition.name === startingEleven.competition)
               setCompetitionSelected(competition)
 
@@ -181,7 +182,7 @@ export default function App() {
     })
   }
 
-  async function handleSaveClick() {
+  async function handleSaveClick(suppressAlert = false) {
     if (!isAuthenticated) {
       setLoginInfoOpen(true)
       setLoginInfoAnchor(loginButtonRef.current)
@@ -199,10 +200,13 @@ export default function App() {
       }
 
       let response
+      let returnId = saveId
+
       if (!saveId) {
         response = await postStartingEleven(userId, token, saveData)
         if (response.status === 201) {
           const { insertId } = await response.json()
+          returnId = insertId
           setSaveId(insertId)
         }
       }
@@ -210,9 +214,11 @@ export default function App() {
         response = await updateStartingEleven(saveId, token, saveData)
       }
 
-      if (response.status === 201) {
+      if (response.status === 201 && !suppressAlert) {
         setSaveAlert(true)
       }
+
+      return returnId
     }
   }
 
@@ -229,6 +235,12 @@ export default function App() {
     else {
       setLoadDialogOpen(true)
     }
+  }
+
+  async function handleShareClick() {
+    const shareId = await handleSaveClick(true)
+    window.navigator.clipboard.writeText(`${window.location}?share=${shareId}`)
+    setShareAlert(true)
   }
 
   async function handleLoadSelected(startingEleven) {
@@ -306,6 +318,12 @@ export default function App() {
             onClose={() => setSaveAlert(false)}
             message="Starting Eleven Saved!"
           />
+          <Snackbar
+            open={shareAlert}
+            autoHideDuration={3000}
+            onClose={() => setShareAlert(false)}
+            message="Link copied to clickboard!"
+          />
 
           <AppDashboard
             state={{
@@ -325,6 +343,7 @@ export default function App() {
             onStartingElevenPlayerClear={handleStartingElevenPlayerClear}
             onSaveClick={handleSaveClick}
             onLoadClick={handleLoadClick}
+            onShareClick={handleShareClick}
             saveId={saveId}
           />
         </Container>
