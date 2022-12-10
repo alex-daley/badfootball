@@ -239,8 +239,10 @@ export default function App() {
 
   async function handleShareClick() {
     const shareId = await handleSaveClick(true)
-    window.navigator.clipboard.writeText(`${window.location}?share=${shareId}`)
-    setShareAlert(true)
+    if (shareId) {
+        window.navigator.clipboard.writeText(`${window.location}?share=${shareId}`)
+        setShareAlert(true)
+    }
   }
 
   async function handleLoadSelected(startingEleven) {
