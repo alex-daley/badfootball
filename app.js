@@ -69,7 +69,7 @@ module.exports = function createApp() {
     res.json(teams)
   })
 
-  app.post('/api/startingeleven', async(req, res) => {
+  app.post('/api/startingeleven', checkJwt, async(req, res) => {
     const { userId, startingEleven } = req.body 
     try {
       const insertId = await insertStartingEleven(userId, startingEleven) 
@@ -81,7 +81,7 @@ module.exports = function createApp() {
     }
   }) 
 
-  app.put('/api/startingeleven', async(req, res) => {
+  app.put('/api/startingeleven', checkJwt, async(req, res) => {
     const { startingElevenId, startingEleven } = req.body 
     try {
       await updateStartingEleven(startingElevenId, startingEleven) 
@@ -129,7 +129,7 @@ module.exports = function createApp() {
     }
   })
 
-  app.delete('/api/startingeleven/:startingElevenId', async(req, res) => {
+  app.delete('/api/startingeleven/:startingElevenId', checkJwt, async(req, res) => {
     const { startingElevenId } = req.params
      
     try {

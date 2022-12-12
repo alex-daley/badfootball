@@ -7,7 +7,7 @@ function upperCaseFirstCharacter(str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-export default function WrappedSelect({ value, values, onChange, label }) {
+export default function UtilSelect({ value, values, onChange, label }) {
   const labelId = `${label}-select-helper-label`
   const selectId = `${label}-select-helper`
 
